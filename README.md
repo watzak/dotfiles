@@ -10,7 +10,17 @@ Personal configuration files managed with [GNU Stow](https://www.gnu.org/softwar
 
 ## Requirements
 
+### Core
 - GNU Stow (install with `sudo apt-get install stow` on Debian/Ubuntu)
+
+### Tmux Dependencies
+- `entr` - File watcher for tmux-autoreload plugin
+- TPM (Tmux Plugin Manager) - Installed during setup
+
+Install on Debian/Ubuntu:
+```bash
+sudo apt-get install stow entr
+```
 
 ## Installation
 
@@ -48,6 +58,31 @@ git clone <your-repo-url> dotfiles
 cd dotfiles
 stow -t ~ zsh tmux wezterm
 ```
+
+#### Setting up Tmux Plugins
+
+After stowing tmux config, you need to set up TPM and install plugins:
+
+1. Install required dependencies:
+```bash
+sudo apt-get install entr  # Required for tmux-autoreload
+```
+
+2. Install TPM (Tmux Plugin Manager):
+```bash
+git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+```
+
+3. Start tmux and install plugins:
+```bash
+tmux
+# Then press: Ctrl+A followed by Shift+I (capital I)
+# Wait for plugins to install
+```
+
+4. To manually save/restore sessions:
+   - Save: `Ctrl+A` then `Shift+S`
+   - Restore: `Ctrl+A` then `Shift+R`
 
 ## Usage
 
@@ -96,9 +131,10 @@ stow -R -t ~ <package>
 
 ## Notes
 
-- **Tmux Plugins**: The `plugins/` directory is excluded via `.gitignore`. Plugins are managed by [TPM](https://github.com/tmux-plugins/tpm) and will be automatically installed when you start tmux.
-- **Backup Files**: Original configs are backed up to `~/.config-backup/` before symlinking.
+- **Tmux Plugins**: The `plugins/` directory is excluded via `.gitignore`. Plugins are managed by [TPM](https://github.com/tmux-plugins/tpm) and need to be installed separately (see setup instructions above). This keeps the repo lightweight.
+- **Backup Files**: Original configs are backed up to `~/.config-backup/` during initial setup.
 - **Live Updates**: Since configs are symlinked, any changes you make to the files are immediately reflected in the git repository. Remember to commit and push your changes!
+- **Plugin Dependencies**: Some tmux plugins require system packages (e.g., `entr` for tmux-autoreload). Install them as needed.
 
 ## Structure
 
@@ -141,3 +177,24 @@ ls -lh ~/.config/wezterm
 ```
 
 Each should show a symlink arrow (`->`) pointing to the dotfiles directory.
+
+### Tmux Plugin Issues
+
+If you get errors like "Command not found: entr" or tmux-resurrect not working:
+
+1. Install missing dependencies:
+```bash
+sudo apt-get install entr
+```
+
+2. Ensure TPM is installed:
+```bash
+ls ~/.config/tmux/plugins/tpm || git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+```
+
+3. Reload tmux config and install plugins:
+```bash
+# Inside tmux: Ctrl+A then :
+# Then type: source-file ~/.config/tmux/tmux.conf
+# Then press: Ctrl+A then Shift+I to install plugins
+```

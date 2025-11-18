@@ -82,7 +82,7 @@ config.background = {
     width = '100%',
     height = '100%',
     -- Opacity des Hintergrundbildes (0.0 = unsichtbar, 1.0 = vollständig sichtbar)
-    opacity = 0.35,  -- Erhöht für bessere Sichtbarkeit
+    opacity = 0.45,  -- Erhöht für bessere Sichtbarkeit
     -- Horizontale Ausrichtung: 'Left', 'Center', 'Right'
     horizontal_align = 'Center',
     -- Vertikale Ausrichtung: 'Top', 'Middle', 'Bottom'
@@ -93,7 +93,7 @@ config.background = {
     -- Wie das Bild skaliert wird
     -- 'Fit' = passt ins Fenster, 'Cover' = füllt das Fenster
     hsb = {
-      brightness = 0.3,   -- Erhöht für bessere Sichtbarkeit (0.0 - 1.0)
+      brightness = 0.4,   -- Erhöht für bessere Sichtbarkeit (0.0 - 1.0)
       hue = 1.0,          -- Farbton beibehalten
       saturation = 1.0,   -- Sättigung beibehalten
     },
@@ -103,7 +103,7 @@ config.background = {
     source = { Color = '#282a36' },
     width = '100%',
     height = '100%',
-    opacity = 0.65,  -- Reduziert für mehr Hintergrund-Sichtbarkeit
+    opacity = 0.55,  -- Reduziert für mehr Hintergrund-Sichtbarkeit
   },
 }
 
@@ -316,6 +316,49 @@ wezterm.on('show-right-click-menu', function(window, pane, items)
     end),
   })
   return items
+end)
+
+-- ╔═══════════════════════════════════════════════════════════════════════════╗
+-- ║  TAB TITLE - SHOW TMUX SESSION NAME                                       ║
+-- ║  WezTerm tabs will display the current tmux session name                  ║
+-- ╚═══════════════════════════════════════════════════════════════════════════╝
+wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
+  local title = tab.tab_index + 1  -- Default to tab number
+  local pane = tab.active_pane
+  
+  -- Check if we're inside a tmux session
+  if pane and pane.user_vars and pane.user_vars.TMUX then
+    -- Get tmux session name from the pane title or foreground process
+    local tmux_session = pane.title:match('^%[(.-)%]') or pane.user_vars.TMUX_SESSION
+    if tmux_session then
+      title = '󱂬 ' .. tmux_session  -- Nerd font tmux icon + session name
+    end
+  end
+  
+  -- Fallback: use pane title if available
+  if not pane.user_vars or not pane.user_vars.TMUX then
+    if pane.title and #pane.title > 0 then
+      title = pane.title
+    end
+  end
+  
+  -- Styling for active vs inactive tabs
+  local background = '#282a36'
+  local foreground = '#f8f8f2'
+  
+  if tab.is_active then
+    background = '#bd93f9'  -- Dracula purple for active tab
+    foreground = '#282a36'
+  elseif hover then
+    background = '#44475a'  -- Dracula selection for hover
+    foreground = '#f8f8f2'
+  end
+  
+  return {
+    { Background = { Color = background } },
+    { Foreground = { Color = foreground } },
+    { Text = ' ' .. title .. ' ' },
+  }
 end)
 
 return config
