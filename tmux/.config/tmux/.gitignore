@@ -1,0 +1,6 @@
+# Exclude tmux plugins directory (managed by TPM)
+plugins/
+
+# Exclude backup files
+*.bak
+
